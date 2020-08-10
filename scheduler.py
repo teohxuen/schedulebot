@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+import shutil
 
 def caldates(data):
     dates = data.split()
@@ -80,6 +81,7 @@ def updatecal(start, end, events, calendar):
                 calendar[i][1].remove(event[2])
     return calendar
 
+
 def main():
     message = '''10 Aug 20 23 Aug 20
     ***REMOVED***, ***REMOVED***, ***REMOVED***, ***REMOVED***
@@ -89,9 +91,7 @@ def main():
     13 Aug, ***REMOVED*** AVI, 13 Aug 
     14 Aug, ***REMOVED*** ***REMOVED***, 14 Aug
     17 Aug, ***REMOVED*** ***REMOVED***, 19 Aug
-    19 Aug, O1 ***REMOVED***, 20 Aug
-    19 Aug, ***REMOVED***0 ***REMOVED***, 25 Aug
-    19 Jul, ***REMOVED***1 ***REMOVED***, 20 Aug'''
+    19 Aug, O1 ***REMOVED***, 20 Aug'''
     #Input will be start date, end date of calendar
     # monday is the first day of the week
     # months "jan feb mar apr may jun jul aug sept oct nov dec"
@@ -103,6 +103,7 @@ def main():
     # add in options to show aros priority, or when aros is up
     # better error messages and error handling
     # better handling of dates
+    # merge cells
     data = message.split("\n")
 
     # get the actual start and end date of the calendar
@@ -125,11 +126,41 @@ def main():
     calendar = createcal(start, end, svc) # create a calendar
 
     calendar = updatecal(start, end, events, calendar) # add events to the calendar
-
-
-
-    for i in calendar:
-        print(i)
     
+    shutil.copy('template.html', 'table.html') # copy the template html
+    file = open('table.html','a')
+
+    for week in range(0, len(calendar),7):
+        # write the days
+        file.write("<tr>")
+        for day in range(7): 
+            file.write(f"<th> {calendar[week+day][0]} </th>")
+        file.write("</tr>")
+
+        # write the events
+        file.write("<tr>")
+        for day in range(7): 
+            if calendar[week+day][2] == "": # if no events
+                file.write(f"<td>  </td>")
+            else:
+                file.write("<td>")
+                for event in calendar[week+day][2]:
+                    file.write(f"<div> {event}</div>")
+                file.write("</td>")
+        file.write("</tr>")
+
+        # write the svc ***REMOVED***
+        file.write("<tr>")
+        for day in range(7): 
+            if calendar[week+day][1] == "": # if no ***REMOVED***s
+                file.write(f"<td>  </td>")
+            else:
+                ***REMOVED***s = ", ".join(calendar[week+day][1]) # join the list of ***REMOVED*** into a string
+                file.write(f"<td> {***REMOVED***s} </td>")
+        file.write("</tr>") 
+
+    file.write("</table>")
+    file.close()       
+            
 
 main()
