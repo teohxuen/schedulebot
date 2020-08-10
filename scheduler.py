@@ -2,13 +2,13 @@ import datetime
 
 message = '''10 Aug 20 23 Aug 20
 ***REMOVED***, ***REMOVED***, ***REMOVED***, ***REMOVED***
-10 Aug ***REMOVED*** Annually (12 Aug)
-11 Aug ***REMOVED*** ***REMOVED*** (11 Aug) 
-13 Aug ***REMOVED*** PRE AVI (13 Aug) 
-13 Aug ***REMOVED*** AVI (13 Aug) 
-14 Aug ***REMOVED*** ***REMOVED*** (14 Aug)
-17 Aug ***REMOVED*** ***REMOVED*** (19 Aug)
-19 Aug O1 ***REMOVED*** (20 Aug)'''
+10 Aug, ***REMOVED*** Annually, 12 Aug
+11 Aug, ***REMOVED*** ***REMOVED***, 11 Aug 
+13 Aug, ***REMOVED*** PRE AVI, 13 Aug
+13 Aug, ***REMOVED*** AVI, 13 Aug 
+14 Aug, ***REMOVED*** ***REMOVED***, 14 Aug
+17 Aug, ***REMOVED*** ***REMOVED***, 19 Aug
+19 Aug, O1 ***REMOVED***, 20 Aug'''
 #Input will be start date, end date of calendar
 # monday is the first day of the week
 # months "jan feb mar apr may jun jul aug sept oct nov dec"
@@ -34,3 +34,5 @@ end = datetime.date(int(years[1]),int(umonths[1]),int(days[1]))
 start -= datetime.timedelta(days=start.weekday()) #change the starting date to the week monday
 end += datetime.timedelta(days=6-end.weekday())  #change the ending date to the week sunday
 print(start,end)
+svc = [a.strip() for a in data[1].split(',')] #get the svc ***REMOVED***
+print(svc)
