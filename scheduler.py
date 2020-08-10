@@ -16,10 +16,32 @@ def caldates(data):
     print(start,end)
     return start, end
 
-def event(data, svc, start, end):
+def event(data, svc, calstart, calend):
     data.strip()
     info = [x.strip() for x in data.split(',')]
-    print(info)
+    months ={"JAN":1, "FEB":2, "MAR":3, "APR":4, "MAY":5, "JUN":6, "JUL":7, "AUG":8, "SEP":9, "OCT":10, "NOV":11, "DEC":12}
+    start = info[0].split()
+    name = info[1]
+    end = info[2].split()
+    startday = int(start[0])
+    startmonth = int(months[start[1].upper()])
+    endday = int(end[0])
+    endmonth = int(months[end[1].upper()])
+    # attempt to handle the issue of years
+    if startmonth < calstart.month:
+        startyear = calend.year
+    else:
+        startyear = calstart.year
+    if endmonth < calstart.month:
+        endyear = calend.year
+    else:
+        endyear = calstart.year 
+    startdate = datetime.date(startyear, startmonth, startday)
+    enddate = datetime.date(endyear, endmonth, endday)
+    ***REMOVED*** = name[0:2] #***REMOVED*** down for event
+    eventinfo = [startdate, enddate, ***REMOVED***, name]
+    print(eventinfo)
+    return eventinfo
 
 def main():
     message = '''10 Aug 20 23 Aug 20
@@ -52,8 +74,13 @@ def main():
     svc = [a.strip() for a in data[1].split(',')] 
     print(svc)
 
+    events = []
+
     for i in range(2, len(data)):
-        event(data[i], svc, start, end)
+        eventinfo = event(data[i], svc, start, end)
+        events.append(eventinfo)
     
-    
+    events.sort() #sort by date
+
+
 main()
