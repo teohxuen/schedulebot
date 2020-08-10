@@ -1,4 +1,4 @@
-import datetime
+from datetime import date, timedelta
 
 def caldates(data):
     dates = data.split()
@@ -9,11 +9,10 @@ def caldates(data):
     endmonth = int(months[dates[4].upper()])
     startday = int(dates[0])
     endday = int(dates[3])
-    start = datetime.date(startyear, startmonth, startday)
-    end = datetime.date(endyear, endmonth, endday)
-    start -= datetime.timedelta(days=start.weekday()) #change the starting date to the week monday
-    end += datetime.timedelta(days=6-end.weekday())  #change the ending date to the week sunday
-    print(start,end)
+    start = date(startyear, startmonth, startday)
+    end = date(endyear, endmonth, endday)
+    start -= timedelta(days=start.weekday()) #change the starting date to the week monday
+    end += timedelta(days=6-end.weekday())  #change the ending date to the week sunday
     return start, end
 
 def parseevent(data, svc, calstart, calend):
@@ -36,11 +35,11 @@ def parseevent(data, svc, calstart, calend):
         endyear = calend.year
     else:
         endyear = calstart.year 
-    startdate = datetime.date(startyear, startmonth, startday)
-    enddate = datetime.date(endyear, endmonth, endday)
-    ***REMOVED*** = name[0:2] #***REMOVED*** down for event
+    startdate = date(startyear, startmonth, startday)
+    enddate = date(endyear, endmonth, endday)
+    temp = name.split()
+    ***REMOVED*** = temp[0]
     eventinfo = [startdate, enddate, ***REMOVED***, name]
-    print(eventinfo)
     return eventinfo
 
 def checkdetail(eventinfo, calstart, calend):
@@ -62,8 +61,8 @@ def main():
     14 Aug, ***REMOVED*** ***REMOVED***, 14 Aug
     17 Aug, ***REMOVED*** ***REMOVED***, 19 Aug
     19 Aug, O1 ***REMOVED***, 20 Aug
-    19 Aug, ***REMOVED*** ***REMOVED***, 25 Aug
-    19 Jul, ***REMOVED*** ***REMOVED***, 20 Aug'''
+    19 Aug, ***REMOVED***0 ***REMOVED***, 25 Aug
+    19 Jul, ***REMOVED***1 ***REMOVED***, 20 Aug'''
     #Input will be start date, end date of calendar
     # monday is the first day of the week
     # months "jan feb mar apr may jun jul aug sept oct nov dec"
@@ -81,19 +80,48 @@ def main():
     # find if the start date is mon
     start, end = caldates(data[0])
 
-    #get the svc ***REMOVED***
+    # get the svc ***REMOVED***
     svc = [a.strip() for a in data[1].split(',')] 
-    print(svc)
 
+    # list of events
     events = []
 
     for i in range(2, len(data)):
         eventinfo = parseevent(data[i], svc, start, end)
-        if checkdetail(eventinfo, start, end):
+        if checkdetail(eventinfo, start, end): # check if event is valid and append to list of events if valid
             events.append(eventinfo)
     
     events.sort() #sort by date
 
+    #create array to imitate calendar
+    tempdate = start
+    calendar = []
+    while tempdate <= end:
+        currdate = []
+        #currdate.append(tempdate)
+        currdate.append(tempdate.strftime("%d %b")) #format into a readable date
+        currdate.append(svc.copy()) # list of svc ***REMOVED***
+        currdate.append([]) # list of events
+        calendar.append(currdate)
+        tempdate += timedelta(days = 1)
 
+    for event in events:
+        if event[0] < start: # if event start is before cal start
+            startday = 0
+        else:
+            startday = (event[0] - start).days
+        if event[1] > end: # if event end is after event end
+            endday = (end - start).days
+        else:
+            endday = (event[1] - start).days
+        for i in range(startday, endday + 1):
+            calendar[i][2].append(event[3]) #add name of event to list of event on that day
+            if event[2] in calendar[i][1]: # if ***REMOVED*** under servicing is one of the svc ***REMOVED***
+                calendar[i][1].remove(event[2])
+
+
+    for i in calendar:
+        print(i)
+    
 
 main()
