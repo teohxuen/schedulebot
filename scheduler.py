@@ -1,5 +1,6 @@
 from datetime import date, timedelta
 import shutil
+import imgkit
 
 def caldates(data):
     dates = data.split()
@@ -161,6 +162,7 @@ def main():
 
     file.write("</table>")
     file.close()       
-            
+
+    imgkit.from_file('table.html', 'out.jpg')
 
 main()
