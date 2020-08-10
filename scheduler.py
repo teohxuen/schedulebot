@@ -51,6 +51,35 @@ def checkdetail(eventinfo, calstart, calend):
         return False
     return True
 
+def createcal(start, end, svc):
+    #create array to imitate calendar
+    calendar = []
+    while start <= end:
+        currdate = []
+        #currdate.append(tempdate)
+        currdate.append(start.strftime("%d %b")) #format into a readable date
+        currdate.append(svc.copy()) # list of svc ***REMOVED***
+        currdate.append([]) # list of events
+        calendar.append(currdate)
+        start += timedelta(days = 1) # increment date
+    return calendar
+
+def updatecal(start, end, events, calendar):
+    for event in events:
+        if event[0] < start: # if event start is before cal start
+            startday = 0
+        else:
+            startday = (event[0] - start).days
+        if event[1] > end: # if event end is after event end
+            endday = (end - start).days
+        else:
+            endday = (event[1] - start).days
+        for i in range(startday, endday + 1):
+            calendar[i][2].append(event[3]) #add name of event to list of event on that day
+            if event[2] in calendar[i][1]: # if ***REMOVED*** under servicing is one of the svc ***REMOVED***
+                calendar[i][1].remove(event[2])
+    return calendar
+
 def main():
     message = '''10 Aug 20 23 Aug 20
     ***REMOVED***, ***REMOVED***, ***REMOVED***, ***REMOVED***
@@ -93,31 +122,10 @@ def main():
     
     events.sort() #sort by date
 
-    #create array to imitate calendar
-    tempdate = start
-    calendar = []
-    while tempdate <= end:
-        currdate = []
-        #currdate.append(tempdate)
-        currdate.append(tempdate.strftime("%d %b")) #format into a readable date
-        currdate.append(svc.copy()) # list of svc ***REMOVED***
-        currdate.append([]) # list of events
-        calendar.append(currdate)
-        tempdate += timedelta(days = 1)
+    calendar = createcal(start, end, svc) # create a calendar
 
-    for event in events:
-        if event[0] < start: # if event start is before cal start
-            startday = 0
-        else:
-            startday = (event[0] - start).days
-        if event[1] > end: # if event end is after event end
-            endday = (end - start).days
-        else:
-            endday = (event[1] - start).days
-        for i in range(startday, endday + 1):
-            calendar[i][2].append(event[3]) #add name of event to list of event on that day
-            if event[2] in calendar[i][1]: # if ***REMOVED*** under servicing is one of the svc ***REMOVED***
-                calendar[i][1].remove(event[2])
+    calendar = updatecal(start, end, events, calendar) # add events to the calendar
+
 
 
     for i in calendar:
