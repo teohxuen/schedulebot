@@ -1,6 +1,11 @@
 from datetime import date, timedelta
 import shutil
 import imgkit
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+
+def botinit(update,context):
+    # todo explain how to use the bot
+    context.bot.send_message(chat_id=update.effective_chat.id, text="I'm a bot, please talk to me!")
 
 def caldates(data):
     dates = data.split()
@@ -83,16 +88,7 @@ def updatecal(start, end, events, calendar):
     return calendar
 
 
-def main():
-    message = '''10 Aug 20 23 Aug 20
-    ***REMOVED***, ***REMOVED***, ***REMOVED***, ***REMOVED***
-    10 Aug, ***REMOVED*** Annually, 12 Aug
-    11 Aug, ***REMOVED*** ***REMOVED***, 11 Aug 
-    13 Aug, ***REMOVED*** PRE AVI, 13 Aug
-    13 Aug, ***REMOVED*** AVI, 13 Aug 
-    14 Aug, ***REMOVED*** ***REMOVED***, 14 Aug
-    17 Aug, ***REMOVED*** ***REMOVED***, 19 Aug
-    19 Aug, O1 ***REMOVED***, 20 Aug'''
+def scheduler(message, chatid):
     #Input will be start date, end date of calendar
     # monday is the first day of the week
     # months "jan feb mar apr may jun jul aug sept oct nov dec"
@@ -128,8 +124,8 @@ def main():
 
     calendar = updatecal(start, end, events, calendar) # add events to the calendar
     
-    shutil.copy('template.html', 'table.html') # copy the template html
-    file = open('table.html','a')
+    shutil.copy('template.html', f'table{chatid}.html') # copy the template html
+    file = open(f'table{chatid}.html','a')
 
     for week in range(0, len(calendar),7):
         # write the days
@@ -163,6 +159,21 @@ def main():
     file.write("</table>")
     file.close()       
 
-    imgkit.from_file('table.html', 'out.jpg')
+    imgkit.from_file(f'table{chatid}.html', f'out{chatid}.jpg')
+
+def botschedule(update,context):
+    scheduler(update.message.text, update.effective_chat.id)
+    context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(f'out{update.effective_chat.id}.jpg', 'rb'))
+
+def main():
+
+    updater = Updater(token='***REMOVED***', use_context=True)
+    dispatcher = updater.dispatcher
+    start_handler = CommandHandler('start', botinit)
+    dispatcher.add_handler(start_handler)
+    scheduler_handler = MessageHandler(Filters.text & (~Filters.command), botschedule)
+    dispatcher.add_handler(scheduler_handler)
+    updater.start_polling()  
+
 
 main()
