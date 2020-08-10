@@ -16,7 +16,7 @@ def caldates(data):
     print(start,end)
     return start, end
 
-def event(data, svc, calstart, calend):
+def parseevent(data, svc, calstart, calend):
     data.strip()
     info = [x.strip() for x in data.split(',')]
     months ={"JAN":1, "FEB":2, "MAR":3, "APR":4, "MAY":5, "JUN":6, "JUL":7, "AUG":8, "SEP":9, "OCT":10, "NOV":11, "DEC":12}
@@ -43,6 +43,15 @@ def event(data, svc, calstart, calend):
     print(eventinfo)
     return eventinfo
 
+def checkdetail(eventinfo, calstart, calend):
+    if eventinfo[1] < eventinfo[0]:  # check if event end date is after event start date
+        print(eventinfo[3], "is invalid as the event end date is before its start date")
+        return False
+    if eventinfo[0] > calend: # check if event start date is after calendar end date
+        print(eventinfo[3], "is invalid as the event start date is after the calendar end date")
+        return False
+    return True
+
 def main():
     message = '''10 Aug 20 23 Aug 20
     ***REMOVED***, ***REMOVED***, ***REMOVED***, ***REMOVED***
@@ -52,7 +61,9 @@ def main():
     13 Aug, ***REMOVED*** AVI, 13 Aug 
     14 Aug, ***REMOVED*** ***REMOVED***, 14 Aug
     17 Aug, ***REMOVED*** ***REMOVED***, 19 Aug
-    19 Aug, O1 ***REMOVED***, 20 Aug'''
+    19 Aug, O1 ***REMOVED***, 20 Aug
+    19 Aug, ***REMOVED*** ***REMOVED***, 25 Aug
+    19 Jul, ***REMOVED*** ***REMOVED***, 20 Aug'''
     #Input will be start date, end date of calendar
     # monday is the first day of the week
     # months "jan feb mar apr may jun jul aug sept oct nov dec"
@@ -77,10 +88,12 @@ def main():
     events = []
 
     for i in range(2, len(data)):
-        eventinfo = event(data[i], svc, start, end)
-        events.append(eventinfo)
+        eventinfo = parseevent(data[i], svc, start, end)
+        if checkdetail(eventinfo, start, end):
+            events.append(eventinfo)
     
     events.sort() #sort by date
+
 
 
 main()
