@@ -4,6 +4,8 @@ import imgkit
 import os   
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
+def unknown(update, context):
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Sorry, I didn't understand that command.")
 
 def botinit(update,context):
     # todo explain how to use the bot
@@ -11,10 +13,12 @@ def botinit(update,context):
 
 def bothelp(update, context):
     message = 'Please enter your message as shown:\n' +\
+            '/make\n'+\
             '<calendar start><calendar end>\n'+\
             '<serviceable ***REMOVED***s>\n'+\
             '<event start>,<***REMOVED*** used><event name>,<event end>'
-    example = '10 Aug 20 24 Aug 20\n'+\
+    example = '/make\n'+\
+            '10 Aug 20 24 Aug 20\n'+\
             '***REMOVED***, ***REMOVED***, ***REMOVED***, ***REMOVED***\n'+\
             '11 Aug, ***REMOVED*** ***REMOVED***, 13 Aug\n'+\
             '14 Aug, ***REMOVED*** ***REMOVED***, 14 Aug\n'+\
@@ -134,6 +138,8 @@ def scheduler(message, chatid, context):
 
     data = message.split("\n")
 
+    data.pop(0) #remove /make
+
     if len(data) <= 2:
         context.bot.send_message(chat_id=chatid, text="Error: Message invalid, are you missing the list of serviceable ***REMOVED***?")
         return False
@@ -230,8 +236,11 @@ def main():
     help_handler = CommandHandler('help', bothelp)
     dispatcher.add_handler(help_handler) 
 
-    scheduler_handler = MessageHandler(Filters.text & (~Filters.command), botschedule)
+    scheduler_handler = CommandHandler('make', botschedule)
     dispatcher.add_handler(scheduler_handler)
+
+    unknown_handler = MessageHandler(Filters.command, unknown)
+    dispatcher.add_handler(unknown_handler)
 
     updater.start_polling()  
 
