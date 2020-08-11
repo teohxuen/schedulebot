@@ -216,6 +216,9 @@ def scheduler(message, chatid, context):
         file.write("</tr>") 
 
     file.write("</table>")
+    file.write("</table>")
+    file.write("</body>")
+    file.write("</html>")
     file.close()       
 
     imgkit.from_file(f'{filepath}/table{chatid}.html', f'{filepath}/out{chatid}.jpg')
