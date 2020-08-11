@@ -25,45 +25,51 @@ def bothelp(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text=example)
 
 def caldates(data):
-    dates = data.split()
-    months ={"JAN":1, "FEB":2, "MAR":3, "APR":4, "MAY":5, "JUN":6, "JUL":7, "AUG":8, "SEP":9, "OCT":10, "NOV":11, "DEC":12}
-    startyear = int('20'+dates[2])
-    endyear = int('20'+dates[5])
-    startmonth = int(months[dates[1].upper()])
-    endmonth = int(months[dates[4].upper()])
-    startday = int(dates[0])
-    endday = int(dates[3])
-    start = date(startyear, startmonth, startday)
-    end = date(endyear, endmonth, endday)
-    start -= timedelta(days=start.weekday()) #change the starting date to the week monday
-    end += timedelta(days=6-end.weekday())  #change the ending date to the week sunday
+    try:
+        dates = data.split()
+        months ={"JAN":1, "FEB":2, "MAR":3, "APR":4, "MAY":5, "JUN":6, "JUL":7, "AUG":8, "SEP":9, "OCT":10, "NOV":11, "DEC":12}
+        startyear = int('20'+dates[2])
+        endyear = int('20'+dates[5])
+        startmonth = int(months[dates[1].upper()])
+        endmonth = int(months[dates[4].upper()])
+        startday = int(dates[0])
+        endday = int(dates[3])
+        start = date(startyear, startmonth, startday)
+        end = date(endyear, endmonth, endday)
+        start -= timedelta(days=start.weekday()) #change the starting date to the week monday
+        end += timedelta(days=6-end.weekday())  #change the ending date to the week sunday
+    except:
+        return False, False
     return start, end
 
 def parseevent(data, svc, calstart, calend):
-    data.strip()
-    info = [x.strip() for x in data.split(',')]
-    months ={"JAN":1, "FEB":2, "MAR":3, "APR":4, "MAY":5, "JUN":6, "JUL":7, "AUG":8, "SEP":9, "OCT":10, "NOV":11, "DEC":12}
-    start = info[0].split()
-    name = info[1]
-    end = info[2].split()
-    startday = int(start[0])
-    startmonth = int(months[start[1].upper()])
-    endday = int(end[0])
-    endmonth = int(months[end[1].upper()])
-    # attempt to handle the issue of years
-    if startmonth < calstart.month:
-        startyear = calend.year
-    else:
-        startyear = calstart.year
-    if endmonth < calstart.month:
-        endyear = calend.year
-    else:
-        endyear = calstart.year 
-    startdate = date(startyear, startmonth, startday)
-    enddate = date(endyear, endmonth, endday)
-    temp = name.split()
-    ***REMOVED*** = temp[0]
-    eventinfo = [startdate, enddate, ***REMOVED***, name]
+    try:
+        data.strip()
+        info = [x.strip() for x in data.split(',')]
+        months ={"JAN":1, "FEB":2, "MAR":3, "APR":4, "MAY":5, "JUN":6, "JUL":7, "AUG":8, "SEP":9, "OCT":10, "NOV":11, "DEC":12}
+        start = info[0].split()
+        name = info[1]
+        end = info[2].split()
+        startday = int(start[0])
+        startmonth = int(months[start[1].upper()])
+        endday = int(end[0])
+        endmonth = int(months[end[1].upper()])
+        # attempt to handle the issue of years
+        if startmonth < calstart.month:
+            startyear = calend.year
+        else:
+            startyear = calstart.year
+        if endmonth < calstart.month:
+            endyear = calend.year
+        else:
+            endyear = calstart.year 
+        startdate = date(startyear, startmonth, startday)
+        enddate = date(endyear, endmonth, endday)
+        temp = name.split()
+        ***REMOVED*** = temp[0]
+        eventinfo = [startdate, enddate, ***REMOVED***, name]
+    except:
+        return False
     return eventinfo
 
 def checkdetail(eventinfo, calstart, calend, chatid, context):
@@ -125,29 +131,41 @@ def scheduler(message, chatid, context):
     # create results folder if it does not exisit
     if not os.path.exists(filepath):
         os.makedirs(filepath)
-        
-
 
     data = message.split("\n")
+
+    if len(data) <= 2:
+        context.bot.send_message(chat_id=chatid, text="Error: Message invalid, are you missing the list of serviceable ***REMOVED***?")
+        return False
 
     # get the actual start and end date of the calendar
     # find if the start date is mon
     start, end = caldates(data[0])
+    if not start:
+        context.bot.send_message(chat_id=chatid, text="Error: Calendar Start/End date is invalid or missing")
+        return False
     
     if start > end : # if calendar start date is after its end date
         context.bot.send_message(chat_id=chatid, text="Error: Calendar start date is after its end date")
         return False
 
     # get the svc ***REMOVED***
-    svc = [a.strip() for a in data[1].split(',')] 
+    svc = [a.strip() for a in data[1].split(',')]
+    for i in svc: # check if list of serviceable ***REMOVED*** is valid
+        if i[:1] != "A" or len(i) != 2:
+            context.bot.send_message(chat_id=chatid, text="List of serviceable ***REMOVED*** is invalid")
+            return False
 
     # list of events
     events = []
 
     for i in range(2, len(data)):
         eventinfo = parseevent(data[i], svc, start, end)
-        if checkdetail(eventinfo, start, end, chatid, context): # check if event is valid and append to list of events if valid
-            events.append(eventinfo)
+        if not eventinfo: # if event is invalid
+           context.bot.send_message(chat_id=chatid, text=f"Event: '{data[i]}' is invalid") 
+        else:
+            if checkdetail(eventinfo, start, end, chatid, context): # check if event is valid and append to list of events if valid
+                events.append(eventinfo)
     
     events.sort() #sort by date
 
