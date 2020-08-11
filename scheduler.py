@@ -1,6 +1,7 @@
 from datetime import date, timedelta
 import shutil
 import imgkit
+import os   
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
 
@@ -117,6 +118,16 @@ def scheduler(message, chatid, context):
     # better error messages and error handling
     # better handling of dates
     # merge cells
+
+    script_dir = os.path.dirname(os.path.realpath("__file__"))
+    rel_dir = "results"
+    filepath = os.path.join(script_dir, rel_dir)
+    # create results folder if it does not exisit
+    if not os.path.exists(filepath):
+        os.makedirs(filepath)
+        
+
+
     data = message.split("\n")
 
     # get the actual start and end date of the calendar
@@ -144,8 +155,8 @@ def scheduler(message, chatid, context):
 
     calendar = updatecal(start, end, events, calendar) # add events to the calendar
     
-    shutil.copy('template.html', f'table{chatid}.html') # copy the template html
-    file = open(f'table{chatid}.html','a')
+    shutil.copy('template.html', f'{filepath}/table{chatid}.html') # copy the template html
+    file = open(f'{filepath}/table{chatid}.html','a')
 
     for week in range(0, len(calendar),7):
         # write the days
@@ -179,14 +190,14 @@ def scheduler(message, chatid, context):
     file.write("</table>")
     file.close()       
 
-    imgkit.from_file(f'table{chatid}.html', f'out{chatid}.jpg')
-    return True
+    imgkit.from_file(f'{filepath}/table{chatid}.html', f'{filepath}/out{chatid}.jpg')
+    return filepath
 
 def botschedule(update,context):
-    success = scheduler(update.message.text, update.effective_chat.id, context)
-    if success:
+    filepath = scheduler(update.message.text, update.effective_chat.id, context)
+    if filepath:
         context.bot.send_message(chat_id=update.effective_chat.id, text="Here's your picture!")
-        context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(f'out{update.effective_chat.id}.jpg', 'rb'))
+        context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(f'{filepath}/out{update.effective_chat.id}.jpg', 'rb'))
     else:
         context.bot.send_message(chat_id=update.effective_chat.id, text="Unfortunately we are unable to generate the schedule, check out /help for assistance")
 
