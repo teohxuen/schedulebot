@@ -3,9 +3,25 @@ import shutil
 import imgkit
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 
+
 def botinit(update,context):
     # todo explain how to use the bot
-    context.bot.send_message(chat_id=update.effective_chat.id, text="I'm a bot, please talk to me!")
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Hi I'm a bot that help to generate schedules to help you visualise better. Call '/help' for instructions!")
+
+def bothelp(update, context):
+    message = 'Please enter your message as shown:\n' +\
+            '<calendar start><calendar end>\n'+\
+            '<serviceable ***REMOVED***s>\n'+\
+            '<event start>,<***REMOVED*** used><event name>,<event end>'
+    example = '10 Aug 20 24 Aug 20\n'+\
+            '***REMOVED***, ***REMOVED***, ***REMOVED***, ***REMOVED***\n'+\
+            '11 Aug, ***REMOVED*** ***REMOVED***, 13 Aug\n'+\
+            '14 Aug, ***REMOVED*** ***REMOVED***, 14 Aug\n'+\
+            '17 Aug, ***REMOVED*** ***REMOVED***, 19 Aug\n'+\
+            '20 Aug, O1 ***REMOVED***, 20 Aug\n'+\
+            '24 Aug, ***REMOVED***, 24 Aug'
+    context.bot.send_message(chat_id=update.effective_chat.id, text=message)
+    context.bot.send_message(chat_id=update.effective_chat.id, text=example)
 
 def caldates(data):
     dates = data.split()
@@ -49,12 +65,12 @@ def parseevent(data, svc, calstart, calend):
     eventinfo = [startdate, enddate, ***REMOVED***, name]
     return eventinfo
 
-def checkdetail(eventinfo, calstart, calend):
+def checkdetail(eventinfo, calstart, calend, chatid, context):
     if eventinfo[1] < eventinfo[0]:  # check if event end date is after event start date
-        print(eventinfo[3], "is invalid as the event end date is before its start date")
+        context.bot.send_message(chat_id=chatid, text=f"{eventinfo[3]} is invalid as the event end date is before its start date")
         return False
     if eventinfo[0] > calend: # check if event start date is after calendar end date
-        print(eventinfo[3], "is invalid as the event start date is after the calendar end date")
+        context.bot.send_message(chat_id=chatid, text=f"{eventinfo[3]} is invalid as the event start date is after the calendar end date")
         return False
     return True
 
@@ -88,8 +104,8 @@ def updatecal(start, end, events, calendar):
     return calendar
 
 
-def scheduler(message, chatid):
-    #Input will be start date, end date of calendar
+def scheduler(message, chatid, context):
+    #Input will be start date, end date of calendars
     # monday is the first day of the week
     # months "jan feb mar apr may jun jul aug sept oct nov dec"
     # <start date of cal><end date of cal>
@@ -106,6 +122,10 @@ def scheduler(message, chatid):
     # get the actual start and end date of the calendar
     # find if the start date is mon
     start, end = caldates(data[0])
+    
+    if start > end : # if calendar start date is after its end date
+        context.bot.send_message(chat_id=chatid, text="Error: Calendar start date is after its end date")
+        return False
 
     # get the svc ***REMOVED***
     svc = [a.strip() for a in data[1].split(',')] 
@@ -115,7 +135,7 @@ def scheduler(message, chatid):
 
     for i in range(2, len(data)):
         eventinfo = parseevent(data[i], svc, start, end)
-        if checkdetail(eventinfo, start, end): # check if event is valid and append to list of events if valid
+        if checkdetail(eventinfo, start, end, chatid, context): # check if event is valid and append to list of events if valid
             events.append(eventinfo)
     
     events.sort() #sort by date
@@ -160,19 +180,30 @@ def scheduler(message, chatid):
     file.close()       
 
     imgkit.from_file(f'table{chatid}.html', f'out{chatid}.jpg')
+    return True
 
 def botschedule(update,context):
-    scheduler(update.message.text, update.effective_chat.id)
-    context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(f'out{update.effective_chat.id}.jpg', 'rb'))
+    success = scheduler(update.message.text, update.effective_chat.id, context)
+    if success:
+        context.bot.send_message(chat_id=update.effective_chat.id, text="Here's your picture!")
+        context.bot.send_photo(chat_id=update.effective_chat.id, photo=open(f'out{update.effective_chat.id}.jpg', 'rb'))
+    else:
+        context.bot.send_message(chat_id=update.effective_chat.id, text="Unfortunately we are unable to generate the schedule, check out /help for assistance")
 
 def main():
 
     updater = Updater(token='***REMOVED***', use_context=True)
     dispatcher = updater.dispatcher
+
     start_handler = CommandHandler('start', botinit)
-    dispatcher.add_handler(start_handler)
+    dispatcher.add_handler(start_handler) 
+
+    help_handler = CommandHandler('help', bothelp)
+    dispatcher.add_handler(help_handler) 
+
     scheduler_handler = MessageHandler(Filters.text & (~Filters.command), botschedule)
     dispatcher.add_handler(scheduler_handler)
+
     updater.start_polling()  
 
 
