@@ -1,5 +1,4 @@
 .vscode
-*.html
-!template.html
-*.jpg
+results/
 weasy.py
+weasytemplate.html
