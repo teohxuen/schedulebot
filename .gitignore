@@ -2,3 +2,4 @@
 *.html
 !template.html
 *.jpg
+weasy.py
