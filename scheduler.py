@@ -155,6 +155,10 @@ def scheduler(message, chatid, context):
         context.bot.send_message(chat_id=chatid, text="Error: Calendar start date is after its end date")
         return False
 
+    if (end-start).days > 93:
+        context.bot.send_message(chat_id=chatid, text="Error: Calendar start date and end date differ by more than 3 months")
+        return False
+
     # get the svc ***REMOVED***
     svc = [a.strip() for a in data[1].split(',')]
     for i in svc: # check if list of serviceable ***REMOVED*** is valid
