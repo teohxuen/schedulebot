@@ -16,7 +16,7 @@ def bothelp(update, context):
             '/make\n'+\
             '<calendar start><calendar end>\n'+\
             '<serviceable ***REMOVED***s>\n'+\
-            '<event start>,<***REMOVED*** used><event name>,<event end>'+\
+            '<event start>,<***REMOVED*** used><event name>,<event end>\n'+\
             'Additionally, you can omit the event end date if the event is a 1 day event.'
     example = '/make\n'+\
             '10 Aug 20 24 Aug 20\n'+\
@@ -27,6 +27,7 @@ def bothelp(update, context):
             '20 Aug, O1 ***REMOVED***\n'+\
             '24 Aug, ***REMOVED***'
     context.bot.send_message(chat_id=update.effective_chat.id, text=message)
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Here's an example: ")
     context.bot.send_message(chat_id=update.effective_chat.id, text=example)
 
 def caldates(data):
@@ -255,7 +256,7 @@ def main():
 
     updater.start_polling()
 
-    print("Bot is running! BEEP BOOP")  
+    print("Bot is running! BEEP BOOP!")  
 
 
 main()
