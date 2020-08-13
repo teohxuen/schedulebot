@@ -16,15 +16,16 @@ def bothelp(update, context):
             '/make\n'+\
             '<calendar start><calendar end>\n'+\
             '<serviceable ***REMOVED***s>\n'+\
-            '<event start>,<***REMOVED*** used><event name>,<event end>'
+            '<event start>,<***REMOVED*** used><event name>,<event end>'+\
+            'Additionally, you can omit the event end date if the event is a 1 day event.'
     example = '/make\n'+\
             '10 Aug 20 24 Aug 20\n'+\
             '***REMOVED***, ***REMOVED***, ***REMOVED***, ***REMOVED***\n'+\
             '11 Aug, ***REMOVED*** ***REMOVED***, 13 Aug\n'+\
-            '14 Aug, ***REMOVED*** ***REMOVED***, 14 Aug\n'+\
-            '17 Aug, ***REMOVED*** ***REMOVED***, 19 Aug\n'+\
-            '20 Aug, O1 ***REMOVED***, 20 Aug\n'+\
-            '24 Aug, ***REMOVED***, 24 Aug'
+            '17 Aug, ***REMOVED*** ***REMOVED***\n'+\
+            '18 Aug, ***REMOVED*** ***REMOVED***, 19 Aug\n'+\
+            '20 Aug, O1 ***REMOVED***\n'+\
+            '24 Aug, ***REMOVED***'
     context.bot.send_message(chat_id=update.effective_chat.id, text=message)
     context.bot.send_message(chat_id=update.effective_chat.id, text=example)
 
@@ -53,7 +54,10 @@ def parseevent(data, svc, calstart, calend):
         months ={"JAN":1, "FEB":2, "MAR":3, "APR":4, "MAY":5, "JUN":6, "JUL":7, "AUG":8, "SEP":9, "OCT":10, "NOV":11, "DEC":12}
         start = info[0].split()
         name = info[1]
-        end = info[2].split()
+        if len(info) == 2: #if event end on the same day just put the event start date can le
+            end = start
+        else:
+            end = info[2].split()
         startday = int(start[0])
         startmonth = int(months[start[1].upper()])
         endday = int(end[0])
@@ -155,7 +159,7 @@ def scheduler(message, chatid, context):
         context.bot.send_message(chat_id=chatid, text="Error: Calendar start date is after its end date")
         return False
 
-    if (end-start).days > 93:
+    if (end-start).days > 105:
         context.bot.send_message(chat_id=chatid, text="Error: Calendar start date and end date differ by more than 3 months")
         return False
 
@@ -249,7 +253,9 @@ def main():
     unknown_handler = MessageHandler(Filters.command, unknown)
     dispatcher.add_handler(unknown_handler)
 
-    updater.start_polling()  
+    updater.start_polling()
+
+    print("Bot is running! BEEP BOOP")  
 
 
 main()
