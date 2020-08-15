@@ -36,7 +36,7 @@ def botschedule(update,context):
 
 def main():
 
-    updater = Updater(token='***REMOVED***', use_context=True)
+    updater = Updater(token='YOUR TOKEN HERE', use_context=True)
     dispatcher = updater.dispatcher
 
     start_handler = CommandHandler('start', botinit)
