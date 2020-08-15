@@ -2,3 +2,4 @@
 results/
 weasy.py
 weasytemplate.html
+__pycache__
