@@ -8,14 +8,14 @@
 * Note that the bot assumes the start of the week as Monday
 
 ## Screenshots
+#### Using the "/help" command shows you a template as well as an example text
 ![alt text](example/help.png "/help command")
-Using the "/help" command shows you a template as well as an example text
 
+#### An example of the bot in action
 ![alt text](example/example.png "/make command being used")
-An example of the bot in action
 
+#### An example of the generated image
 ![alt text](example/generatedschedule.jpg  "generated image")
-An example of the generated image
 
 ## How it works
 1. Bot recieves the data
