@@ -9,13 +9,13 @@
 
 ## Screenshots
 #### Using the "/help" command shows you a template as well as an example text
-![alt text](example/help.png "/help command")
+![/help command](example/help.png "/help command")
 
 #### An example of the bot in action
-![alt text](example/example.png "/make command being used")
+![/make command being used](example/example.png "/make command being used")
 
 #### An example of the generated image
-![alt text](example/generatedschedule.jpg  "generated image")
+![generated image](example/generatedschedule.jpg  "generated image")
 
 ## How it works
 1. Bot recieves the data
